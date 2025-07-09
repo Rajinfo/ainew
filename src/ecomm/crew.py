@@ -100,11 +100,15 @@ class Ecomm:
         )
 
     @task
-    def cicd_pipeline_task(self) -> Task:
+    def cicd_pipeline_fe_task(self) -> Task:
         return Task(
-            config=self.tasks_config['cicd_pipeline'],  # type: ignore[index]
+            config=self.tasks_config['cicd_pipeline_fe'],  # type: ignore[index]
         )
-
+    @task
+    def cicd_pipeline_be_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['cicd_pipeline_be'],  # type: ignore[index]
+        )
     @crew
     def crew(self) -> Crew:
         """Creates the Software Development Crew"""
