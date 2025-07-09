@@ -37,7 +37,7 @@ develop_code_fe:
       - Proper routing using `react-router-dom`.
       - Unit tests for components using Jest or React Testing Library.
   agent: developer
-  output_file: ecomm/frontend/
+  output_file: ecomm/frontend/frontend.md
 
 
 develop_code_be:
@@ -63,7 +63,7 @@ develop_code_be:
       - Proper dependency injection for services and repositories.
       - Unit and integration tests for controllers and services.
   agent: developer
-  output_file: ecomm/backend/
+  output_file: ecomm/backend/Backend.md
 
 
 
@@ -92,13 +92,22 @@ testing:
   expected_output: >
     test_results.txt containing identified bugs and test results.
   agent: tester
-  output_file: test_results.txt
+  output_file: ecomm/test_results.txt
 
-cicd_pipeline:
+cicd_pipeline_fe:
   description: >
     Set up the CI/CD pipeline and deploy the application to the production environment.
     Save the pipeline configuration to `pipeline_config.yaml`.
   expected_output: >
-    pipeline_config.yaml containing the CI/CD pipeline configuration.
+    pipeline_config.yaml containing the CI/CD pipeline configuration for front end.
   agent: devops
-  output_file: ecomm/frontend/pipeline_config.yaml, ecomm/backend/pipeline_config.yaml
+  output_file: ecomm/frontend/pipeline_config.yaml
+
+cicd_pipeline_be:
+  description: >
+    Set up the CI/CD pipeline and deploy the application to the production environment.
+    Save the pipeline configuration to `pipeline_config.yaml`.
+  expected_output: >
+    pipeline_config.yaml containing the CI/CD pipeline configuration for backend.
+  agent: devops
+  output_file: ecomm/backend/pipeline_config.yaml
