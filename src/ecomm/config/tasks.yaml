@@ -1,0 +1,104 @@
+analyze_prd:
+  description: >
+    Analyze the provided PRD and extract key features and requirements for the application : {topic}.
+    Save the analysis to analysis.md.
+  expected_output: >
+    analysis.md containing the extracted features and requirements.
+  agent: prd_analyzer
+  output_file: ecomm/arch/analysis.md
+
+design_ui:
+  description: >
+    Based on the PRD analysis, design the user interface and user experience for the application.
+    Save the design to `design.sketch`.
+  expected_output: >
+    design.sketch containing the UI/UX design for the application.
+  agent: designer
+  output_file: ecomm/arch/design.sketch
+
+
+develop_code_fe:
+  description: >
+    Develop the frontend using React.js based on the design and PRD analysis : {topic}.
+    Ensure the project structure follows best practices, includes runnable code, and provides testable functionality.
+    Save each component, page, and service as separate files in the `ecomm/frontend/` directory.
+    kindly refer to the design.sketch file for the design and the analysis.md file for the requirements.
+  expected_output: >
+    - A React.js application with the following project structure:
+     - `ecomm/frontend/`: Contains all source code files (components, pages, services, etc.).
+      - `src/`: Contains all source code files (components, pages, services, etc.).
+      - `public/`: Contains static assets such as images and the `index.html` file.
+      - `package.json`: Specifies dependencies and scripts for running and testing the application.
+      - `README.md`: Provides instructions for setting up, running, and testing the application.
+     - A `README.md` file should be saved in `ecomm/frontend/`.
+    - The application should be runnable using `npm start` and testable using `npm test`.
+    - Ensure the application includes:
+      - At least one main page and one reusable component.
+      - Proper routing using `react-router-dom`.
+      - Unit tests for components using Jest or React Testing Library.
+  agent: developer
+  output_file: ecomm/frontend/
+
+
+develop_code_be:
+  description: >
+    Develop the backend using Spring Boot based on the design and PRD analysis.
+    Ensure the project structure follows best practices, includes runnable code, and provides testable functionality.
+    Save each controller, service, repository, and model as separate files in the `ecomm/backend/src/main/java/com/example/ecomm/` directory.
+    kindly refer to the analysis.md file for the requirements.
+  expected_output: >
+    - A Spring Boot application with the following project structure:
+      - Each controller should be saved as a separate file in `ecomm/backend/src/main/java/com/example/ecomm/controller/`.
+      - Each service should be saved as a separate file in `ecomm/backend/src/main/java/com/example/ecomm/service/`.
+      - Each repository should be saved as a separate file in `ecomm/backend/src/main/java/com/example/ecomm/repository/`.
+      - A `README.md` file should be saved in `ecomm/backend/`.
+      - `src/main/java/`: Contains all Java source code files (controllers, services, repositories, etc.).
+      - `src/main/resources/`: Contains configuration files like `application.properties` or `application.yml`.
+      - `src/test/java/`: Contains unit and integration tests for the backend.
+      - `pom.xml`: Specifies dependencies and build configurations for the project.
+      - `README.md`: Provides instructions for setting up, running, and testing the application.
+    - The application should be runnable using `mvn spring-boot:run` and testable using `mvn test`.
+    - Ensure the application includes:
+      - At least one RESTful endpoint.
+      - Proper dependency injection for services and repositories.
+      - Unit and integration tests for controllers and services.
+  agent: developer
+  output_file: ecomm/backend/
+
+
+
+code_review:
+  description: >
+    Review the code written by the developer for both the React.js frontend and Spring Boot backend.
+    Ensure the code adheres to industry standards, best practices, and is optimized for performance, scalability, and maintainability.
+    Provide detailed feedback in `review.md`.
+    Update the reviewed files in the `frontend/` directory for React.js and the `backend/` directory for Spring Boot.
+  expected_output: >
+    - `review.md` containing:
+      - Feedback on code quality, structure, and adherence to best practices.
+      - Suggestions for improvement (e.g., refactoring, optimization, or adding missing functionality).
+      - Identification of any bugs or issues.
+    - Updated files in:
+      - `frontend/`: React.js code with improvements based on the review.
+      - `backend/`: Spring Boot code with improvements based on the review.
+  agent: senior_developer
+  output_file: ecomm/cderev/review.md
+
+
+testing:
+  description: >
+    Test the application thoroughly to identify bugs and ensure it meets the requirements.
+    Save the test results to `test_results.txt`.
+  expected_output: >
+    test_results.txt containing identified bugs and test results.
+  agent: tester
+  output_file: test_results.txt
+
+cicd_pipeline:
+  description: >
+    Set up the CI/CD pipeline and deploy the application to the production environment.
+    Save the pipeline configuration to `pipeline_config.yaml`.
+  expected_output: >
+    pipeline_config.yaml containing the CI/CD pipeline configuration.
+  agent: devops
+  output_file: ecomm/frontend/pipeline_config.yaml, ecomm/backend/pipeline_config.yaml
