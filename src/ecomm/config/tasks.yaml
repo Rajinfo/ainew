@@ -84,6 +84,23 @@ code_review:
   agent: senior_developer
   output_file: ecomm/cderev/review.md
 
+generate_backend_structure:
+  description: >
+    Use the Markdown File Extractor tool to read backend.md, extract all file paths and code blocks,
+    and write each file to its appropriate location in the folder structure.
+  expected_output: >
+    - All code blocks in backend.md should be saved to their corresponding paths.
+    - Successfully written Java, config, and properties files should exist in ecomm/backend/
+  agent: code_generator
+
+generate_frontend_structure:
+  description: >
+    Use the Markdown File Extractor tool to read frontend.md, extract all file paths and code blocks,
+    and write each file to its appropriate location in the folder structure.
+  expected_output: >
+    - All code blocks in frontend.md should be saved to their corresponding paths.
+    - Successfully written react files should exist in ecomm/frontend/
+  agent: code_generator
 
 testing:
   description: >

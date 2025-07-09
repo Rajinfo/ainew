@@ -1,12 +1,81 @@
+import os
+import re
+from pathlib import Path
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
+from crewai_tools import FileWriterTool
+from crewai.tools import BaseTool
+
 
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
 
+
+# --- Custom Tool to Extract and Write Markdown Files ---
+class MarkdownToFileTool(BaseTool):
+    name: str = "Markdown File Extractor"
+    description: str = "Extracts code blocks from a markdown file and writes them to the specified file paths."
+    markdown_file_path: str
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _run(self, input: str) -> str:
+        print(f"🛠️ MarkdownTool is processing: {self.markdown_file_path}")
+        if not os.path.exists(self.markdown_file_path):
+            return f"❌ Markdown file not found: {self.markdown_file_path}"
+
+        with open(self.markdown_file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        result_log = []
+
+        # Pattern 1: ### File: `ecomm/backend/...`
+        pattern1 = r"### File: `(.+?)`\n```(?:\w+)?\n(.*?)\n```"
+        matches1 = re.findall(pattern1, content, re.DOTALL)
+
+        for file_path, code in matches1:
+            result_log.append(self._write_file(file_path.strip(), code))
+
+        # Pattern 2: ### src/... (relative path to be prefixed with ecomm/backend/)
+        pattern2 = r"### (src\/.+?)\n```(?:\w+)?\n(.*?)\n```"
+        matches2 = re.findall(pattern2, content, re.DOTALL)
+
+        for relative_path, code in matches2:
+            file_path = os.path.join("ecomm/backend", relative_path)
+            result_log.append(self._write_file(file_path.strip(), code))
+
+        # Pattern 3: ### src/... (relative path to be prefixed with ecomm/backend/)
+        pattern3 = r"### (ecomm\/.+?)\n```(?:\w+)?\n(.*?)\n```"
+        matches3= re.findall(pattern2, content, re.DOTALL)
+
+        for file_path, code in matches3:
+            result_log.append(self._write_file(file_path.strip(), code))
+
+        if not (matches1 or matches2 or matches3):
+            return "⚠️ No valid code blocks with file paths found."
+
+        return "\n".join(result_log)
+
+    def _write_file(self, file_path: str, code: str) -> str:
+        try:
+            directory = os.path.dirname(file_path)
+            filename = os.path.basename(file_path)
+            Path(directory).mkdir(parents=True, exist_ok=True)
+            print(f"📄 Writing: {file_path}")
+            file_writer = FileWriterTool()
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(code.strip())
+            return f"✅ Wrote {file_path}"
+        except Exception as e:
+            return f"❌ Failed to write {file_path}: {e}"
+
+# --- Setup tool, agent, task, and crew ---
+markdown_tool = MarkdownToFileTool(markdown_file_path="ecomm/backend/Backend.md")
+markdown_tool_fe = MarkdownToFileTool(markdown_file_path="ecomm/frontend/Frontend.md")
 @CrewBase
 class Ecomm:
     """Software Development Crew"""
@@ -38,6 +107,14 @@ class Ecomm:
     def developer(self) -> Agent:
         return Agent(
             config=self.agents_config['developer'],  # type: ignore[index]
+            verbose=True
+        )
+
+    @agent
+    def code_generator(self) -> Agent:
+        return Agent(
+            config=self.agents_config['code_generator'],  # type: ignore[index]
+            tools=[markdown_tool,markdown_tool_fe],
             verbose=True
         )
 
@@ -86,6 +163,17 @@ class Ecomm:
     def develop_code_be_task(self) -> Task:
         return Task(
             config=self.tasks_config['develop_code_be'],  # type: ignore[index]
+        )
+    @task
+    def generate_backend_structure_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['generate_backend_structure'],  # type: ignore[index]
+            agent=self.code_generator()
+        )
+    def generate_frontend_structure_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['generate_frontend_structure'],  # type: ignore[index]
+            agent=self.code_generator()
         )
     @task
     def code_review_task(self) -> Task:
