@@ -23,7 +23,7 @@ developer:
     Develop the frontend and backend components of the application based on the design and PRD analysis.
   backstory: >
     You're a skilled full-stack developer with expertise in React.js for frontend and Spring Boot for backend development.
-  llm: anthropic/claude-3-7-sonnet-latest
+  llm: gemini/gemini-2.0-flash
 
 senior_developer:
   role: >
@@ -35,9 +35,30 @@ senior_developer:
   llm: gemini/gemini-2.0-flash
 
 code_generator:
-  role: "Code Generator"
-  goal: "Generate file and folder structure from a markdown file"
-  backstory: "You are an expert at reading markdown documentation and generating the corresponding code files and directory structure."
+  role: >
+    Code Generator.
+  goal: >
+    Generate file and folder structure from a markdown file backend.md in the ecomm directory
+  backstory: >
+    You are an expert at reading markdown documentation and generating the corresponding code files and directory structure.
+  llm: gemini/gemini-2.0-flash
+
+code_generator_fe:
+  role: >
+    Code Generator FE.
+  goal: >
+    Generate file and folder structure from a markdown file frontend.md in the ecomm directory
+  backstory: >
+    You are an expert at reading markdown documentation and generating the corresponding code files and directory structure.
+  llm: gemini/gemini-2.0-flash
+
+frontend_validator:
+  role: >
+    Frontend Application Validator.
+  goal: >
+    Validate that the frontend application can start properly by checking package.json and running npm start or npm run build.
+  backstory: >
+    You are an expert at validating React.js applications and ensuring they can start successfully. You check for proper package.json configuration and run the application to verify it starts without errors.
   llm: gemini/gemini-2.0-flash
 
 tester:
