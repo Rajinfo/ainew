@@ -21,7 +21,6 @@ develop_code_fe:
   description: >
     Develop the frontend using React.js based on the design and PRD analysis : {topic}.
     Ensure the project structure follows best practices, includes runnable code, and provides testable functionality.
-    Save each component, page, and service as separate files in the `ecomm/frontend/` directory.
     kindly refer to the design.sketch file for the design and the analysis.md file for the requirements.
   expected_output: >
     - A React.js application with the following project structure:
@@ -32,6 +31,9 @@ develop_code_fe:
       - `README.md`: Provides instructions for setting up, running, and testing the application.
      - A `README.md` file should be saved in `ecomm/frontend/`.
     - The application should be runnable using `npm start` and testable using `npm test`.
+     - all the code should be present in output file ie ecomm/frontend/frontend.md file. follow this below step strictly
+      - file should be present in ### File: `ecomm/frontend/...` format
+      - next code should be present after the file path
     - Ensure the application includes:
       - At least one main page and one reusable component.
       - Proper routing using `react-router-dom`.
@@ -44,7 +46,6 @@ develop_code_be:
   description: >
     Develop the backend using Spring Boot based on the design and PRD analysis.
     Ensure the project structure follows best practices, includes runnable code, and provides testable functionality.
-    Save each controller, service, repository, and model as separate files in the `ecomm/backend/src/main/java/com/example/ecomm/` directory.
     kindly refer to the analysis.md file for the requirements.
   expected_output: >
     - A Spring Boot application with the following project structure:
@@ -58,6 +59,9 @@ develop_code_be:
       - `pom.xml`: Specifies dependencies and build configurations for the project.
       - `README.md`: Provides instructions for setting up, running, and testing the application.
     - The application should be runnable using `mvn spring-boot:run` and testable using `mvn test`.
+    - all the code should be present in output file ie ecomm/backend/Backend.md file. follow this below step strictly
+      - file should be present in ### File: `ecomm/backend/...` format
+      - next code should be present after the file path
     - Ensure the application includes:
       - At least one RESTful endpoint.
       - Proper dependency injection for services and repositories.
@@ -65,7 +69,35 @@ develop_code_be:
   agent: developer
   output_file: ecomm/backend/Backend.md
 
+generate_backend_structure:
+  description: >
+    Use the Markdown File Extractor tool to read ecomm/backend/backend.md, extract all file paths and code blocks,
+    and write each file to its appropriate location in the folder structure.
+  expected_output: >
+    - All code blocks in ecomm/backend/backend.md should be saved to their corresponding paths.
+    - Successfully written Java, config, and properties files should exist in ecomm/backend/
+  agent: code_generator
 
+generate_frontend_structure:
+  description: >
+    Use the Markdown File Extractor tool to read ecomm/frontend/frontend.md, extract all file paths and code blocks,
+    and write each file to its appropriate location in the folder structure.
+  expected_output: >
+    - All code blocks in ecomm/frontend/frontend.md should be saved to their corresponding paths.
+    - Successfully written react files should exist in ecomm/frontend/
+  agent: code_generator_fe
+
+validate_frontend_startup:
+  description: >
+    Validate that the frontend application can start properly. Check if package.json exists in ecomm/frontend/ directory.
+    If package.json is present, run npm start or npm run build to verify the application starts successfully.
+    Document any startup errors or successful startup confirmation.
+  expected_output: >
+    - Validation report indicating whether the frontend application can start successfully.
+    - List of any startup errors or missing dependencies.
+    - Confirmation of successful application startup if package.json is present and valid.
+  agent: frontend_validator
+  output_file: ecomm/frontend/startup_validation.txt
 
 code_review:
   description: >
