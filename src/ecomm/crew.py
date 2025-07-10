@@ -7,6 +7,7 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
 from crewai_tools import FileWriterTool
 from crewai.tools import BaseTool
+from typing import Any
 
 
 # If you want to run a snippet of code before or after the crew starts,
@@ -48,14 +49,22 @@ class MarkdownToFileTool(BaseTool):
             file_path = os.path.join("ecomm/backend", relative_path)
             result_log.append(self._write_file(file_path.strip(), code))
 
-        # Pattern 3: ### src/... (relative path to be prefixed with ecomm/backend/)
+        # Pattern 3:  ### : `ecomm/backend/...`
         pattern3 = r"### (ecomm\/.+?)\n```(?:\w+)?\n(.*?)\n```"
-        matches3= re.findall(pattern2, content, re.DOTALL)
+        matches3= re.findall(pattern3, content, re.DOTALL)
 
         for file_path, code in matches3:
             result_log.append(self._write_file(file_path.strip(), code))
 
-        if not (matches1 or matches2 or matches3):
+        # Pattern 4: File path between ```anyword and ``` lines, starting with ecomm/
+        pattern4 = r"```\w+\n(ecomm\/.+?)\n```"
+        matches4 = re.findall(pattern4, content, re.DOTALL)
+
+        for file_path, code in matches4:
+            # For this pattern, we just extract the file path, no code to write
+            result_log.append(self._write_file(file_path.strip(), code))
+
+        if not (matches1 or matches2 or matches3 or matches4):
             return "⚠️ No valid code blocks with file paths found."
 
         return "\n".join(result_log)
@@ -75,7 +84,31 @@ class MarkdownToFileTool(BaseTool):
 
 # --- Setup tool, agent, task, and crew ---
 markdown_tool = MarkdownToFileTool(markdown_file_path="ecomm/backend/Backend.md")
-markdown_tool_fe = MarkdownToFileTool(markdown_file_path="ecomm/frontend/Frontend.md")
+markdown_tool_fe = MarkdownToFileTool(markdown_file_path="ecomm/frontend/frontend.md")
+
+# [Define your Agents, Tasks, Tools, etc.]
+
+def log_task_output(task_output: Any):
+    print("\n--- Task Callback Received ---")
+    if task_output is not None:
+        print(f"Object type: {type(task_output).__name__}")
+        attributes = getattr(
+            task_output, "__dict__", "N/A (object may lack __dict__)"
+        )
+        print(f"Instance attributes: {attributes}")
+    else:
+        print("Received None object.")
+
+def log_step_output(step_output: Any):
+    print("\n--- Step Callback Received ---")
+    if step_output is not None:
+        print(f"Object type: {type(step_output).__name__}")
+        attributes = getattr(
+            step_output, "__dict__", "N/A (object may lack __dict__)"
+        )
+        print(f"Instance attributes: {attributes}")
+    else:
+        print("Received None object.")
 @CrewBase
 class Ecomm:
     """Software Development Crew"""
@@ -114,7 +147,21 @@ class Ecomm:
     def code_generator(self) -> Agent:
         return Agent(
             config=self.agents_config['code_generator'],  # type: ignore[index]
-            tools=[markdown_tool,markdown_tool_fe],
+            tools=[markdown_tool],
+            verbose=True
+        )
+    @agent
+    def code_generator_fe(self) -> Agent:
+        return Agent(
+            config=self.agents_config['code_generator_fe'],  # type: ignore[index]
+            tools=[markdown_tool_fe],
+            verbose=True
+        )
+
+    @agent
+    def frontend_validator(self) -> Agent:
+        return Agent(
+            config=self.agents_config['frontend_validator'],  # type: ignore[index]
             verbose=True
         )
 
@@ -170,11 +217,20 @@ class Ecomm:
             config=self.tasks_config['generate_backend_structure'],  # type: ignore[index]
             agent=self.code_generator()
         )
+    @task
     def generate_frontend_structure_task(self) -> Task:
         return Task(
             config=self.tasks_config['generate_frontend_structure'],  # type: ignore[index]
-            agent=self.code_generator()
+            agent=self.code_generator_fe()
         )
+
+    @task
+    def validate_frontend_startup_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['validate_frontend_startup'],  # type: ignore[index]
+            agent=self.frontend_validator()
+        )
+
     @task
     def code_review_task(self) -> Task:
         return Task(
@@ -208,5 +264,7 @@ class Ecomm:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            # process=Process.hierarchical, # In case you want to use hierarchical process
+            task_callback=log_task_output,
+            step_callback=log_step_output,
+            #process=Process.hierarchical, # In case you want to use hierarchical process
         )
